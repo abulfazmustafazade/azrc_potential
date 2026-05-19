@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HiPo Qiymətləndirmə</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <div class="app-header">
+    <div class="hdr">
+      <div>
+        <div class="ts fm" id="hName"></div>
+        <div class="tx tc2" id="hEmail"></div>
+      </div>
+      <div class="hdr-r">
+        <button class="tog theme-btn" onclick="toggleTheme()"></button>
+        <button class="tog lang-btn" data-lang="az" onclick="setLang('az');render();">AZ</button>
+        <button class="tog lang-btn" data-lang="en" onclick="setLang('en');render();">EN</button>
+        <button class="btn btn-ghost" onclick="clearSession();location.href='index.html'" title="Çıxış">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" transform="scale(.67)"/><polyline points="16 17 21 12 16 7" transform="scale(.67)"/><line x1="21" y1="12" x2="9" y2="12" transform="scale(.67)"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="pbar"><div class="pfill" id="topBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="container">
+
+    <!-- HiPo Description -->
+    <div class="hipo-desc" id="hipoDesc"></div>
+
+    <!-- Progress -->
+    <div class="card mb-6" id="progCard">
+      <div class="flex ic jb mb-2">
+        <div>
+          <div class="ts fm" data-t="dash.progress"></div>
+          <div class="tx tc2" id="progText"></div>
+        </div>
+        <div style="font-size:1.5rem;font-weight:500" id="progPct">0%</div>
+      </div>
+      <div class="pbar"><div class="pfill" id="progFill" style="width:0%"></div></div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="tc" style="padding:3rem">
+      <div class="spinner" style="margin:0 auto"></div>
+      <div class="ts tc2 mt-2" data-t="dash.loading"></div>
+    </div>
+
+    <!-- Employee List -->
+    <div id="list"></div>
+
+    <!-- Empty -->
+    <div id="empty" class="card tc hidden" style="padding:3rem">
+      <div class="ts tc2" data-t="dash.empty"></div>
+    </div>
+
+    <!-- Submit -->
+    <button class="btn btn-p btn-block mt-6" id="subBtn" onclick="submit()" disabled style="display:none">
+      <span data-t="dash.fill"></span>
+    </button>
+
+  </div>
+
+  <div id="toast" class="toast hide"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    initPage();
+    let team = [], votes = {}, originalVotes = {};
+    const session = requireAuth();
+
+    if (session) {
+      document.getElementById('hName').textContent = session.name;
+      document.getElementById('hEmail').textContent = session.email;
+      init();
+    }
+
+    async function init() {
+      try {
+        const [t, existing] = await Promise.all([
+          loadTeam(session.email),
+          loadExistingVotes(session.email)
+        ]);
+        team = t;
+        votes = { ...existing };
+        originalVotes = { ...existing };
+        document.getElementById('loading').classList.add('hidden');
+        render();
+      } catch (e) {
+        document.getElementById('loading').innerHTML = '<div class="ts tc2">Error: ' + e.message + '</div>';
+      }
+    }
+
+    function render() {
+      applyLang();
+      renderDesc();
+
+      if (!team.length) {
+        document.getElementById('empty').classList.remove('hidden');
+        document.getElementById('progCard').classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('subBtn').style.display = '';
+
+      const total = team.length;
+      const done = Object.keys(votes).length;
+      const pct = Math.round((done / total) * 100);
+
+      document.getElementById('progText').textContent = `${done} / ${total} ${t('dash.evaluated')}`;
+      document.getElementById('progPct').textContent = pct + '%';
+      document.getElementById('progFill').style.width = pct + '%';
+      document.getElementById('topBar').style.width = pct + '%';
+
+      document.getElementById('list').innerHTML = team.map(emp => {
+        const v = votes[emp.idCode];
+        const isYes = v === true;
+        const isNo = v === false;
+        return `
+          <div class="emp-row">
+            <div class="emp-info">
+              <div class="av">${getInitials(emp.fullName)}</div>
+              <div>
+                <div class="emp-name">${emp.fullName}</div>
+                <div class="emp-sub">${emp.jobTitle || '—'} · ${emp.department || '—'}</div>
+              </div>
+            </div>
+            <div class="vote-btns">
+              <button class="vote-btn yes ${isYes ? 'sel' : ''}" onclick="vote('${emp.idCode}',true,this)">${t('btn.yes')}</button>
+              <button class="vote-btn no ${isNo ? 'sel' : ''}" onclick="vote('${emp.idCode}',false,this)">${t('btn.no')}</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      updateSubmitBtn();
+    }
+
+    function renderDesc() {
+      const d = document.getElementById('hipoDesc');
+      d.innerHTML = `
+        <h1 data-t="hipo.title">${t('hipo.title')}</h1>
+        <h2 data-t="hipo.subtitle">${t('hipo.subtitle')}</h2>
+        <div class="desc-text">${t('hipo.desc').replace(/\n/g, '<br>')}</div>
+        <div class="instruction" data-t="hipo.instruction">${t('hipo.instruction')}</div>
+        <div class="question-main" data-t="hipo.question">${t('hipo.question')}</div>
+        <div class="criteria">
+          <div class="criteria-col criteria-yes">
+            <h4>✓ ${t('hipo.yes')}</h4>
+            <ul>
+              <li>${t('hipo.yes.1')}</li>
+              <li>${t('hipo.yes.2')}</li>
+              <li>${t('hipo.yes.3')}</li>
+              <li>${t('hipo.yes.4')}</li>
+              <li>${t('hipo.yes.5')}</li>
+            </ul>
+          </div>
+          <div class="criteria-col criteria-no">
+            <h4>✗ ${t('hipo.no')}</h4>
+            <ul>
+              <li>${t('hipo.no.1')}</li>
+              <li>${t('hipo.no.2')}</li>
+              <li>${t('hipo.no.3')}</li>
+              <li>${t('hipo.no.4')}</li>
+              <li>${t('hipo.no.5')}</li>
+            </ul>
+          </div>
+        </div>
+        <div class="notes">
+          <strong>*</strong> ${t('hipo.note1')}<br>
+          <strong>*</strong> ${t('hipo.note2')}
+        </div>
+      `;
+    }
+
+    function vote(idCode, isHipo, el) {
+      votes[idCode] = isHipo;
+
+      // Update buttons in same row
+      const row = el.closest('.emp-row');
+      row.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('sel'));
+      el.classList.add('sel');
+
+      // Update progress
+      const total = team.length;
+      const done = Object.keys(votes).length;
+      const pct = Math.round((done / total) * 100);
+      document.getElementById('progText').textContent = `${done} / ${total} ${t('dash.evaluated')}`;
+      document.getElementById('progPct').textContent = pct + '%';
+      document.getElementById('progFill').style.width = pct + '%';
+      document.getElementById('topBar').style.width = pct + '%';
+
+      updateSubmitBtn();
+    }
+
+    function updateSubmitBtn() {
+      const btn = document.getElementById('subBtn');
+      const total = team.length;
+      const done = Object.keys(votes).length;
+
+      if (done === total && total > 0) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>${t('dash.submit')}</span>`;
+      } else {
+        btn.disabled = true;
+        btn.innerHTML = `<span>${total - done} ${t('dash.left')}</span>`;
+      }
+    }
+
+    async function submit() {
+      const btn = document.getElementById('subBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span> ${t('dash.sending')}`;
+
+      try {
+        await submitVotes(session.email, session.name, team, votes);
+        originalVotes = { ...votes };
+        showToast(t('dash.ok'));
+        btn.innerHTML = `<span>✓ ${t('dash.ok')}</span>`;
+        setTimeout(() => updateSubmitBtn(), 2000);
+      } catch (e) {
+        showToast(t('dash.err') + ': ' + e.message, true);
+        btn.disabled = false;
+        btn.innerHTML = `<span>${t('dash.submit')}</span>`;
+      }
+    }
+  </script>
+</body>
+</html>
