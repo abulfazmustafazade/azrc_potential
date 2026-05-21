@@ -45,7 +45,7 @@ const LANG = {
     'login.title':'Manager login','login.sub':'Enter your email and ID code',
     'login.email':'Corporate email','login.email.ph':'you@company.com',
     'login.code':'ID code','login.code.ph':'Your ID code',
-    'login.btn':'Sign in','login.hint':"Contact HR if you don't know your ID code. The employee list displayed after logging into the profile is formed based on the latest structural updates.\nIf you encounter any discrepancies, please contact the HR team — the issue will be reviewed promptly and corrected.",
+    'login.btn':'Sign in','login.hint':"The ID code is indicated on the employee card. Example: A1234. \n\nThe employee list displayed after logging into the profile is formed based on the latest structural updates.\nIf you encounter any discrepancies, please contact the HR team — the issue will be reviewed promptly and corrected.",
     'login.err.empty':'Enter email and ID code','login.err.invalid':'Invalid email or ID code',
     'login.err.notmgr':'This account is not registered as a manager','login.err.server':'Server error',
     'hipo.title':'High Potential Nomination Form',
