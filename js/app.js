@@ -21,7 +21,7 @@ const LANG = {
     'hipo.question':'Bu əməkdaş Azərconnect tərəfindən müəyyən edilmiş meyarlara uyğun olaraq Yüksək Potensiallı İşçi (HiPo) xüsusiyyətlərini nümayiş etdirən əməkdaş kimi qiymətləndirilirmi?',
     'hipo.yes':'BƏLİ – Yüksək Potensiallı İşçi (HiPo)',
     'hipo.no':'XEYR – Yüksək Potensiallı İşçi deyil (hazırda)',
-    'hipo.yes.1':'Qeyri-müəyyən vəziyyətləri rəhbərlik gözləmədən aydın istiqamət və fəaliyyət planına çevirir',
+    'hipo.yes.1':'Qeyri-müəyyən vəziyyətləri rəhbərlik gözləmədən aydın istiqamət və fəaliyyət planı qurur',
     'hipo.yes.2':'Qərar qəbul edərkən qabaqcadan düşünür və riskləri nəzərə alır',
     'hipo.yes.3':'Rol çərçivəsindən kənara çıxaraq məsuliyyət götürür, inkişaf etdirici və çətin tapşırıqları proaktiv şəkildə üzərinə alır',
     'hipo.yes.4':'Geribildirim əsasında davranışını uyğunlaşdırır və inkişafını görünən şəkildə nümayiş etdirir',
