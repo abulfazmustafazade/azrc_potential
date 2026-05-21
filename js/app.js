@@ -11,7 +11,7 @@ const LANG = {
     'login.title':'Rəhbər girişi','login.sub':'Email və ID kodunuzu daxil edin',
     'login.email':'Korporativ email','login.email.ph':'emailiniz@sirket.az',
     'login.code':'ID kod','login.code.ph':'ID kodunuz',
-    'login.btn':'Daxil ol','login.hint':'ID kodu işçi kartının üzərində qeyd olunub. Misal: A1234 \n\n Profilə daxil olduqda qarşınıza çıxan işçi siyahısı ən son struktur yenilənmələri əsasında formalaşdırılmışdır.\n Hər hansı yanlışlıqla qarşılaşdığınız halda isə HR komandası ilə əlaqə saxlamağınızı xahiş edirik — məsələ operativ şəkildə yoxlanılıb düzəliş ediləcək.',
+    'login.btn':'Daxil ol','login.hint':'ID kodu işçi kartının üzərində qeyd olunub. Misal: A1234\n\nProfilə daxil olduqda qarşınıza çıxan işçi siyahısı ən son struktur yenilənmələri əsasında formalaşdırılmışdır.\n Hər hansı yanlışlıqla qarşılaşdığınız halda isə HR komandası ilə əlaqə saxlamağınızı xahiş edirik — məsələ operativ şəkildə yoxlanılıb düzəliş ediləcək.',
     'login.err.empty':'Email və ID kod daxil edin','login.err.invalid':'Email və ya ID kod yanlışdır',
     'login.err.notmgr':'Bu hesab rəhbər kimi qeydiyyatda deyil','login.err.server':'Server xətası',
     'hipo.title':'Yüksək Potensial Namizədlik Formu',
